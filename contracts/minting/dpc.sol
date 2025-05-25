@@ -26,7 +26,7 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
     }
 
     modifier deprecated() {
-        if (!hasRole(DEPRECATE_ROLE,msg.sender)) revert InvalidRole();
+        // if (!hasRole(DEPRECATE_ROLE,msg.sender)) revert InvalidRole();
         if (isDeprecated) revert Deprecated();
         _;
     }
@@ -39,7 +39,7 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
         address contractApprover,
         address mintValidator,
         address refundManager,
-        address forwarder) ERC1155("") EIP712("","1") ERC2771Context(forwarder)
+        address forwarder) ERC1155("") EIP712("moshpit","1") ERC2771Context(forwarder)
     {
         baseUri = "NoUrl";
         stealthUri = "StealthUrl";
@@ -69,6 +69,9 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
 
         if (voucher.price <= 0) {
             revert InvalidPrice(voucher.tokenId, voucher.price);
+        }
+        if (voucher.buyerQty < 1) {
+            revert InvalidTokenQty(voucher.tokenId, 69 , voucher.quantity);
         }
         if (voucher.quantity < 1) {
             revert InvalidTokenQty(voucher.tokenId, 69 , voucher.quantity);

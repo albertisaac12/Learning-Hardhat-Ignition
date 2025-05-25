@@ -30,3 +30,12 @@ const send = m.send("SendData", address, undefined, "0x16417104"); // Send data
 // Pass futures as Arguments
 const foo = m.contract("ReceivesAnAddress", [token]); // Uses token's address at deploy time
 ```
+
+## Dependencies between future objects
+
+```javascript
+const token = m.contract("Token", ["My Token", "TKN", 18]);
+const receiver = m.contract("Receiver", [], {
+  after: [token], // `receiver` is deployed after `token`
+});
+```

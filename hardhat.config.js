@@ -1,5 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
-
+require("dotenv").config();
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
@@ -7,7 +7,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 10000,
       },
     },
   },
@@ -20,4 +20,19 @@ module.exports = {
     suppressTerminalOutput: false,
     includeIntrinsicGas: true,
   },
+  networks:{
+    polygonAmoy:{
+      url: process.env.A_RPC,
+      accounts: [process.env.owner, process.env.minter, process.env.fundManager,process.env.agencyManager,process.env.contractApprover,process.env.mintValidator,process.env.refundManager],
+      chainId: 80002,
+      gas: "auto",
+
+    }
+  },
+   etherscan: {
+    apiKey: {
+      polygonAmoy: process.env.AE_API,
+    },
+  }
+  
 };

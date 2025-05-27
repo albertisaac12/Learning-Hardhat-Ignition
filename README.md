@@ -39,3 +39,8 @@ const receiver = m.contract("Receiver", [], {
   after: [token], // `receiver` is deployed after `token`
 });
 ```
+
+
+
+https://amoy.polygonscan.com/address/0xa7eAbd05AcC3a01910154937f8FDFc95BCA2386d#code
+0xa7eAbd05AcC3a01910154937f8FDFc95BCA2386d

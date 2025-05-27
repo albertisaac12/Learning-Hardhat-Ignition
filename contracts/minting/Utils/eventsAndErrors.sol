@@ -35,9 +35,8 @@ abstract contract eventsAndErrors {
     error NotSupported(address account);
     error NotTokenCreator(address creator, uint256 tokenId);
     error NotTokenOwner(address wallet, uint256 tokenId, uint256 qty);
-    error TransferError();
     error TokenSaleNotStarted(uint256 tokenId, uint256 start, uint256 now);
     error TokenSaleEnded(uint256 tokenId, uint256 end, uint256 now);
     error InvalidTokenQty(uint256 tokenId, uint256 expected, uint256 actual);
-    error InvalidRole();
+    error MaxTokenQtyExceeded(uint256 actualQty,uint256 maxQty);
 }

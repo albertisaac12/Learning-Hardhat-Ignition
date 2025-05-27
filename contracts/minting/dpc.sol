@@ -82,6 +82,7 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
     
         uint256 tokenQty = tokenMaxQty[voucher.tokenId];
         if (tokenQty > 0) {
+            if(voucher.quantity > tokenQty) revert MaxTokenQtyExceeded(tokenQty,voucher.quantity);
             uint256 tokensMinted = tokenMintedQty[voucher.tokenId];
             if (tokensMinted + voucher.buyerQty > tokenQty) {
                 revert InvalidTokenQty(voucher.tokenId, tokensMinted, tokensMinted + voucher.buyerQty); // Fix the error name here
@@ -157,7 +158,13 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
         uint256 quantity,
         uint256 buyerQty
     ) private {
-     
+        // uint256 maxQty =  tokenMaxQty[tokenId];
+        // uint256 mintedQty = tokenMintedQty[tokenId];
+        // if(mintedQty>0 && buyerQty+mintedQty > maxQty) revert MaxTokenQtyExceeded(buyerQty,maxQty);
+        
+        // Mint Init
+        _mint(buyer, tokenId, buyerQty, "");
+
         // For the first mint
         if (tokenMaxQty[tokenId] == 0) {
             // Mappings init
@@ -183,8 +190,6 @@ contract dappunkCreations is eventsAndErrors, codeConstants, ERC1155, ERC2981,ER
             }
         }
 
-        // Mint Init
-        _mint(buyer, tokenId, buyerQty, "");
 
         emit Minted(creator, tokenId, buyerQty, buyer);
         

@@ -108,7 +108,7 @@ module.exports = Object.freeze({
       },
     },
     dappunkCreations: {
-      file: "contracts/minting/dappunkCreations.sol:dappunkCreations",
+      file: "contracts/minting/dpc.sol:dappunkCreations", // change this
       name: "dpNftV1",
       symbol: "DPN1",
       defaultValues: {

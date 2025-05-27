@@ -34,8 +34,8 @@ async function main() {
         price: ethers.toBigInt("100000000000000000000"),
         quantity: ethers.toBigInt("100"),
         buyerQty: ethers.toBigInt("4"),
-        start: ethers.toBigInt("1748207302"),
-        end: ethers.toBigInt("1748207301"),
+        start: ethers.toBigInt("0"),
+        end: ethers.toBigInt("0"),
         royalty: 0,
         isStealth: false,
         isSbt: false,
@@ -54,6 +54,13 @@ async function main() {
     // console.log(receipt);
 
     console.log(await creations.balanceOf(buyer.address,voucher.tokenId));
+
+    const base = await creations.baseUri();
+    console.log(base);
+    const urir = await creations.uri(voucher.tokenId);
+    console.log("need help: ", urir);
+    const expectedUri = base + voucher.tokenId.toString();
+    console.log(expectedUri);
 
 
 

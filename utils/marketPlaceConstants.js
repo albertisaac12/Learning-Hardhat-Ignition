@@ -139,7 +139,7 @@ module.exports = Object.freeze({
     approvalFailed: "approvalFailed",
     payMentNotConfirmed: "payMentNotConfirmed",
     invalidAmount: "invalidAmount",
-    maliciousSignature: "maliciousSignature",
+    invalidOwner: "invalidOwner",
   },
   events: {
     roleRevoked: "RoleRevoked",

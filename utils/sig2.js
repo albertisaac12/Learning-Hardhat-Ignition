@@ -78,8 +78,8 @@ async function generatePurchaseDigest(purchaseVoucher, contract) {
       { name: "quantity", type: "uint256" },
       { name: "validUntil", type: "uint256" },
       { name: "USDprice", type: "uint256" },
-      { name: "txnfees", type: "uint256" },
-      { name: "purchaseingIn", type: "uint256" },
+      { name: "txnFees", type: "uint256" },
+      { name: "purchasingIn", type: "uint256" },
     ],
   };
 
@@ -100,15 +100,15 @@ async function generatePurchaseDigest(purchaseVoucher, contract) {
     ],
     [
       ethers.id(
-        "purchaseVoucher(address buyerAddress,uint256 purchaseId,uint256 quantity,uint256 validUntil,uint256 USDprice,uint256 txnfees,uint256 purchaseingIn)"
+        "purchaseVoucher(address buyerAddress,uint256 purchaseId,uint256 quantity,uint256 validUntil,uint256 USDprice,uint256 txnFees,uint256 purchasingIn)"
       ),
       purchaseVoucher.buyerAddress,
       purchaseVoucher.purchaseId,
       purchaseVoucher.quantity,
       purchaseVoucher.validUntil,
       purchaseVoucher.USDprice,
-      purchaseVoucher.txnfees,
-      purchaseVoucher.purchaseingIn,
+      purchaseVoucher.txnFees,
+      purchaseVoucher.purchasingIn,
     ]
   );
 
@@ -155,8 +155,8 @@ async function voucherGeneration(
       { name: "quantity", type: "uint256" },
       { name: "validUntil", type: "uint256" },
       { name: "USDprice", type: "uint256" },
-      { name: "txnfees", type: "uint256" },
-      { name: "purchaseingIn", type: "uint256" },
+      { name: "txnFees", type: "uint256" },
+      { name: "purchasingIn", type: "uint256" },
     ],
   };
 
@@ -177,8 +177,8 @@ async function voucherGeneration(
     quantity: details2.quantity,
     validUntil: details2.validUntil,
     USDprice: details2.USDprice, // price conv
-    txnfees: details2.txnfees,
-    purchaseingIn: details2.purchaseingIn, // 0 1 2
+    txnFees: details2.txnFees,
+    purchasingIn: details2.purchasingIn, // 0 1 2
   };
 
   const ownerSignature = await signer1.signTypedData(

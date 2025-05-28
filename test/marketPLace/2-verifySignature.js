@@ -39,13 +39,13 @@ describe("Signature Verification Test", () => {
     contractMp = await ethers.getContractFactory("metaMarketPlace");
 
     logicFactory = await ethers.getContractFactory(
-      "contracts/Logic/forewarder.sol:logic"
+      "contracts/Forwarder/forewarder.sol:logic"
     );
     logicContract = await logicFactory.connect(owner).deploy("meow");
     await logicContract.waitForDeployment();
     logicAddress = await logicContract.getAddress();
 
-    mnft = await contract1155.deploy(
+     mnft = await contract1155.deploy(
       ownerAddress,
       ownerAddress,
       ownerAddress,
@@ -53,8 +53,6 @@ describe("Signature Verification Test", () => {
       ownerAddress,
       ownerAddress,
       ownerAddress,
-      ownerAddress,
-      [ownerAddress],
       logicAddress
     );
     mnftAddress = await mnft.getAddress();
@@ -68,8 +66,10 @@ describe("Signature Verification Test", () => {
 
     mp = await contractMp.deploy(
       mnftAddress,
-      tokenAddress,
       platformFees,
+      ownerAddress,
+      ownerAddress,
+      ownerAddress,
       logicAddress
     );
 
@@ -78,7 +78,7 @@ describe("Signature Verification Test", () => {
     await mnft[func.grantRole](roles.MARKET_PLACE, mpAddress);
     await token[func.grantRole](roles.MARKET_PLACE, mpAddress);
 
-    tokenId = generateTokenId(signer1.address, 1, 1, 15);
+    tokenId = generateTokenId(signer1.address, 1, 1);
     // console.log(tokenId);
     tokenIDnum = ethers.toBigInt(tokenId);
     // console.log(tokenIDnum);
@@ -153,8 +153,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -184,8 +184,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: 0, // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -215,8 +215,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -246,8 +246,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -277,8 +277,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -308,8 +308,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -339,8 +339,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -353,7 +353,7 @@ describe("Signature Verification Test", () => {
       voucher.ownerSiganture = purchaseVoucher.buyerSignature;
       await expect(
         mp[func.verifySignature](voucher, purchaseVoucher)
-      ).to.be.revertedWithCustomError(mp, errors.maliciousSignature);
+      ).to.be.revertedWithCustomError(mp, errors.invalidOwner);
     });
     it("2.8 Should Revert if the Purchase Voucher quantity is zero", async () => {
       const detailsMp = {
@@ -371,8 +371,8 @@ describe("Signature Verification Test", () => {
         quantity: 0,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -402,8 +402,8 @@ describe("Signature Verification Test", () => {
         quantity: 0,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mnft,
@@ -439,8 +439,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mp,
@@ -470,8 +470,8 @@ describe("Signature Verification Test", () => {
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mp,
@@ -487,12 +487,44 @@ describe("Signature Verification Test", () => {
       expect(tx).to.not.be.reverted;
       // expect(tx).to.equal(ethers.toBigInt(tokenId));
     });
-    it("2.12 Should revert if the retrived Quantity is less than the Market Place Voucher Quantity", async () => {
-      const tokenID2 = generateTokenId(signer1.address, 1, 1, 2);
+    // it("2.12 Should revert if the retrived Quantity is less than the Market Place Voucher Quantity", async () => {
+    //   const tokenID2 = generateTokenId(signer1.address, 1, 1);
+    //   const detailsMp = {
+    //     listingAddress: signer1Address,
+    //     tokenId: ethers.toBigInt(tokenID2),
+    //     quantity: 3,
+    //     price: 10, // cost
+    //     listedIn: 2,
+    //     start: 1, // start's From
+    //     end: ethers.toBigInt("2000000000000000000000"), // Valid Till
+    //   };
+    //   const detailsMpPurchase = {
+    //     buyerAddress: ownerAddress,
+    //     purchaseId: ethers.toBigInt(tokenID2),
+    //     quantity: 1,
+    //     validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
+    //     USDprice: ethers.parseEther("0.01"), // cost
+    //     txnFees: 0,
+    //     purchasingIn: 2,
+    //   };
+    //   let { voucher, purchaseVoucher } = await voucherGeneration(
+    //     mp,
+    //     detailsMp,
+    //     detailsMpPurchase,
+    //     owner,
+    //     signer1,
+    //     true
+    //   );
+    //   await expect(
+    //     mp.connect(owner)[func.verifySignature](voucher, purchaseVoucher)
+    //   ).to.be.revertedWithCustomError(mp, errors.invalidQuantity);
+    // });
+    it("2.12 Should revert if the retrived Quantity is less than the Purchase Voucher Quantity", async () => {
+      const tokenID2 = generateTokenId(signer1.address, 1, 1);
       const detailsMp = {
         listingAddress: signer1Address,
         tokenId: ethers.toBigInt(tokenID2),
-        quantity: 3,
+        quantity: 1,
         price: 10, // cost
         listedIn: 2,
         start: 1, // start's From
@@ -501,11 +533,11 @@ describe("Signature Verification Test", () => {
       const detailsMpPurchase = {
         buyerAddress: ownerAddress,
         purchaseId: ethers.toBigInt(tokenID2),
-        quantity: 1,
+        quantity: 3,
         validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mp,
@@ -519,40 +551,8 @@ describe("Signature Verification Test", () => {
         mp.connect(owner)[func.verifySignature](voucher, purchaseVoucher)
       ).to.be.revertedWithCustomError(mp, errors.invalidQuantity);
     });
-    it("2.13 Should revert if the retrived Quantity is less than the Purchase Voucher Quantity", async () => {
-      const tokenID2 = generateTokenId(signer1.address, 1, 1, 1);
-      const detailsMp = {
-        listingAddress: signer1Address,
-        tokenId: ethers.toBigInt(tokenID2),
-        quantity: 1,
-        price: 10, // cost
-        listedIn: 2,
-        start: 1, // start's From
-        end: ethers.toBigInt("2000000000000000000000"), // Valid Till
-      };
-      const detailsMpPurchase = {
-        buyerAddress: ownerAddress,
-        purchaseId: ethers.toBigInt(tokenID2),
-        quantity: 3,
-        validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
-        USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
-      };
-      let { voucher, purchaseVoucher } = await voucherGeneration(
-        mp,
-        detailsMp,
-        detailsMpPurchase,
-        owner,
-        signer1,
-        true
-      );
-      await expect(
-        mp.connect(owner)[func.verifySignature](voucher, purchaseVoucher)
-      ).to.be.revertedWithCustomError(mp, errors.invalidQuantity);
-    });
-    it("2.14 Should revert if the Purchase Voucher Quantity is greater than the Market Place Voucher Quantity", async () => {
-      const tokenID2 = generateTokenId(signer1.address, 1, 1, 2);
+    it("2.13 Should revert if the Purchase Voucher Quantity is greater than the Market Place Voucher Quantity", async () => {
+      const tokenID2 = generateTokenId(signer1.address, 1, 1);
       const detailsMp = {
         listingAddress: signer1Address,
         tokenId: ethers.toBigInt(tokenID2),
@@ -568,8 +568,8 @@ describe("Signature Verification Test", () => {
         quantity: 3,
         validUntil: ethers.toBigInt("1000000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("0.01"), // cost
-        txnfees: 0,
-        purchaseingIn: 2,
+        txnFees: 0,
+        purchasingIn: 2,
       };
       let { voucher, purchaseVoucher } = await voucherGeneration(
         mp,

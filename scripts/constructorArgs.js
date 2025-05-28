@@ -4,7 +4,7 @@ module.exports = [
   "0x6Dec5e9615844DA45cddb919DcC4E3e59686eC0d", // fundManager
   "0xE4F21D981dFc7757E0330280807109F3E45362E4", // agencyManager
   "0x1094cb635A8B2A08d8EDBCBeE5d661f85F85e8A1", // contractApprover
-  "0x9DEd46E32406465Dc26B60c8B031e6Ed794aD9Fe", // mintValidator
+  "0x9DEd46E32406465Dc26B60c8B031e6Ed794aD9Fe", // mintValidator // VALIDATOR
   "0x1dD4724817Bac200fd22Cb6237Ca5db88Da01824",  // refundManager
   "0xc85f9D655c3a2060e217DaF35976D0Ecd17D7257" // logicAddress
 ];

@@ -8,9 +8,11 @@ abstract contract errorsAndEvents {
     event purchaseSuccessful(address indexed buyer, uint256 indexed value, address indexed seller);
     event refunded(address buyer, address indexed seller, uint256 indexed tokenId, uint256 indexed price);
     event transferred(address indexed owner, address indexed to, uint256 indexed tokenId);
-    event tokenAddressChanged(address token);
-    event creationsAddressChanged(address creations);
-
+    event tokenAddressChanged(address indexed token);
+    event creationsAddressChanged(address indexed creations);
+    event nativeCurrencyWithdrawn(uint256 indexed amount);
+    event tokenWithdrawn();
+    event platFormFeesUpdated(uint256 indexed platFormFees);
 
     error itemNotListed();
     error invalidBuyer();

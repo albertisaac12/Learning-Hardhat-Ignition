@@ -48,12 +48,8 @@ describe("6 Withdraw Funds Test", () => {
     await logicContract.waitForDeployment();
     logicAddress = await logicContract.getAddress();
 
-    // await owner.sendTransaction({
-    //   value: ethers.parseEther("1"),
-    //   to: mnftAddress,
-    // });
-
-   mnft = await contract1155.deploy(
+    
+    mnft = await contract1155.deploy(
       ownerAddress,
       ownerAddress,
       ownerAddress,
@@ -65,6 +61,10 @@ describe("6 Withdraw Funds Test", () => {
     );
     mnftAddress = await mnft.getAddress();
     // console.log(mnftAddress);
+    // await owner.sendTransaction({
+    //   value: ethers.parseEther("1"),
+    //   to: mnftAddress,
+    // });
 
     token = await upgrades.deployProxy(contractPunk, [ownerAddress], {
       kind: "uups",
@@ -151,23 +151,26 @@ describe("6 Withdraw Funds Test", () => {
   });
   describe("6.1 Withdraw the fees Deposited (Native and &PUNK)", async () => {
     it("6.1.1 Should be able to withdraw the fees (Native)", async () => {
+      expect(await mnft[func.hasRole](roles.MARKET_PLACE, mpAddress)).to.equal(
+        true
+      );
       const detailsMp = {
         listingAddress: signer1Address,
-        tokenId: ethers.toBigInt(tokenId2),
+        tokenId: tokenIDnum2,
         quantity: 1,
         price: ethers.parseEther("10"), // cost
-        listedIn: 0,
+        listedIn: 2,
         start: 1, // start's From
         end: ethers.toBigInt("1000000000000000000000"), // Valid Till
       };
-      const detailsMpPurchase = {
+       const detailsMpPurchase = {
         buyerAddress: ownerAddress,
-        purchaseId: ethers.toBigInt(tokenId2),
+        purchaseId: tokenIDnum2,
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
-        USDprice: 0, // cost
-        txnFess: 0,
-        purchasingIn: 0,
+        USDprice: ethers.parseEther("10"), // cost
+        txnFees: 0,
+        purchasingIn: 1,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mp,
@@ -178,35 +181,37 @@ describe("6 Withdraw Funds Test", () => {
         true
       );
 
-      const tx = await mp
+     const tx = await mp
         .connect(owner)
-        [func.purchaseNative](voucher, purchaseVoucher, {
+        .purchaseNative(voucher, purchaseVoucher, {
           value: ethers.parseEther("21"),
         });
-    //   const current = new BigNumber(
-    //     await ethers.provider.getBalance(mpAddress)
-    //   );
-    //   await mp.connect(owner)[func.withdraw](ownerAddress);
-    //   const after = await ethers.provider.getBalance(mpAddress);
-    //   expect(current.minus(after)).to.equal(ethers.parseEther("1"));
+      expect(tx).to.not.be.reverted;
+      expect(await mnft.balanceOf(ownerAddress, tokenIDnum2)).to.equal(1);
+      const current = await ethers.provider.getBalance(mpAddress);
+      // console.log(current);
+      await mp.connect(owner).withdrawNative(ownerAddress);
+      const after = await ethers.provider.getBalance(mpAddress);
+      // console.log(after);
+      expect(after).to.equal(ethers.parseEther("0"));
     });
     it("6.1.2 Should be able to withdraw the fees ($PUNK)", async () => {
       const detailsMp = {
         listingAddress: signer1Address,
-        tokenId: ethers.toBigInt(tokenId2),
-        quantity: 2,
+        tokenId: tokenIDnum2,
+        quantity: 1,
         price: ethers.parseEther("10"), // cost
         listedIn: 0,
         start: 1, // start's From
         end: ethers.toBigInt("1000000000000000000000"), // Valid Till
       };
-      const detailsMpPurchase = {
+       const detailsMpPurchase = {
         buyerAddress: ownerAddress,
-        purchaseId: ethers.toBigInt(tokenId2),
-        quantity: 2,
+        purchaseId: tokenIDnum2,
+        quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: 0, // cost
-        txnFess: 0,
+        txnFees: 0,
         purchasingIn: 0,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
@@ -221,28 +226,30 @@ describe("6 Withdraw Funds Test", () => {
         .connect(owner)
         [func.purchasePunk](voucher, purchaseVoucher);
       expect(tx).to.not.be.reverted;
-      const current = new BigNumber(await token.balanceOf(mpAddress));
-      await mp.connect(owner)[func.withdraw](ownerAddress);
+      const current = await token.balanceOf(mpAddress);
+      // console.log(current);
+      await mp.connect(owner).withdrawToken(ownerAddress);
       const after = await token.balanceOf(mpAddress);
-      expect(current.minus(after)).to.equal(ethers.parseEther("1"));
+      // console.log(after);
+      expect(after).to.equal(ethers.parseEther("0"));
     });
     it("6.1.3 Only the DEFAULT_ADMIN_ROLE can withdraw", async () => {
       const detailsMp = {
         listingAddress: signer1Address,
-        tokenId: ethers.toBigInt(tokenId2),
-        quantity: 2,
+        tokenId: tokenIDnum2,
+        quantity: 1,
         price: ethers.parseEther("10"), // cost
         listedIn: 0,
         start: 1, // start's From
         end: ethers.toBigInt("1000000000000000000000"), // Valid Till
       };
-      const detailsMpPurchase = {
+       const detailsMpPurchase = {
         buyerAddress: ownerAddress,
-        purchaseId: ethers.toBigInt(tokenId2),
-        quantity: 2,
+        purchaseId: tokenIDnum2,
+        quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: 0, // cost
-        txnFess: 0,
+        txnFees: 0,
         purchasingIn: 0,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
@@ -257,7 +264,10 @@ describe("6 Withdraw Funds Test", () => {
         .connect(owner)
         [func.purchasePunk](voucher, purchaseVoucher);
       expect(tx).to.not.be.reverted;
-      await expect(mp.connect(signer1)[func.withdraw](ownerAddress))
+      await expect(mp.connect(signer1).withdrawToken(ownerAddress))
+        .to.be.revertedWithCustomError(mp, errors.acUnauthorized)
+        .withArgs(anyValue, anyValue);
+      await expect(mp.connect(signer1).withdrawNative(ownerAddress))
         .to.be.revertedWithCustomError(mp, errors.acUnauthorized)
         .withArgs(anyValue, anyValue);
     });

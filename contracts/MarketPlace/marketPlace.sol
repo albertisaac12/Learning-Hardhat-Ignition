@@ -24,12 +24,12 @@ contract metaMarketPlace is marketPlaceConstants, errorsAndEvents, AccessControl
     receive() external payable {}
 
 
-    constructor(address m1155, uint256 platformFess, address refundManager , address relayer, address manager, address forwarder)
+    constructor(address m1155, uint256 _platformFees, address refundManager , address relayer, address manager, address forwarder)
         EIP712("dappunkMarketPlace", "1")
         ERC2771Context(forwarder)
     {
         nft = I1155(m1155);
-        platformFees = platformFess;
+        platformFees = _platformFees;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(RELAYER_ROLE, relayer);
         _grantRole(REFUND_MANAGER_ROLE,refundManager);
@@ -158,9 +158,15 @@ contract metaMarketPlace is marketPlaceConstants, errorsAndEvents, AccessControl
         );
     }
 
-    function withdraw(address payable to) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        to.sendValue(address(this).balance);
-        punk.safeTransfer(to, punk.balanceOf(address(this)));
+    function withdrawNative(address payable to) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        uint256 bal = address(this).balance;
+        emit nativeCurrencyWithdrawn(bal);
+        to.sendValue(bal);
+    }
+
+    function withdrawToken(address to) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit tokenWithdrawn();
+        punk.safeTransferFrom(address(this),to, punk.balanceOf(address(this)));
     }
 
     function refund(refundVoucher calldata Rvoucher) external onlyRole(REFUND_MANAGER_ROLE) {
@@ -209,6 +215,11 @@ contract metaMarketPlace is marketPlaceConstants, errorsAndEvents, AccessControl
         if(creations == address (0)) revert setNonZeroCreationsAddress();
         emit creationsAddressChanged(creations);
         nft = I1155(creations);
+    }
+
+    function updatePlatFormFees(uint256 _platformFees) external onlyRole(MANAGER_ROLE) {
+        emit platFormFeesUpdated(platformFees);
+        platformFees = _platformFees;
     }
 
 }

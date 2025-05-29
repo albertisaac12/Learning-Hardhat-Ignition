@@ -16,8 +16,9 @@ const {
   events,
 } = require("../../utils/marketPlaceConstants");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
+const { any } = require("hardhat/internal/core/params/argumentTypes");
 
-describe("7 Refund Test", () => {
+describe("6 Withdraw Funds Test", () => {
   let owner, signer1, signer2, signer3;
   let contractNFT, contract1155, contractMp, contractPunk;
   let nft, mnft, mp, token;
@@ -47,11 +48,7 @@ describe("7 Refund Test", () => {
     await logicContract.waitForDeployment();
     logicAddress = await logicContract.getAddress();
 
-    // await owner.sendTransaction({
-    //   value: ethers.parseEther("1"),
-    //   to: mnftAddress,
-    // });
-
+    
     mnft = await contract1155.deploy(
       ownerAddress,
       ownerAddress,
@@ -64,6 +61,10 @@ describe("7 Refund Test", () => {
     );
     mnftAddress = await mnft.getAddress();
     // console.log(mnftAddress);
+    // await owner.sendTransaction({
+    //   value: ethers.parseEther("1"),
+    //   to: mnftAddress,
+    // });
 
     token = await upgrades.deployProxy(contractPunk, [ownerAddress], {
       kind: "uups",
@@ -80,7 +81,6 @@ describe("7 Refund Test", () => {
       ownerAddress,
       logicAddress
     );
-
     mpAddress = await mp.getAddress();
     // await owner.sendTransaction({
     //   value: ethers.parseEther("1"),
@@ -109,13 +109,12 @@ describe("7 Refund Test", () => {
       ),
       stealth: false,
       sbt: false,
-      tokenAdr: null,
       quantity: 15,
       buyerQty: 2,
     };
 
-    const value2 = getMsgValue(details2.price, false, false, details2.buyerQty);
-    // console.log(value2);
+    // const value2 = getMsgValue(details2.price, false, false, details2.buyerQty);
+    // // console.log(value2);
 
     const values2 = {
       tokenId: tokenIDnum2,
@@ -150,70 +149,89 @@ describe("7 Refund Test", () => {
     // console.log(await mnft.balanceOf(signer1Address, tokenIDnum2));
     expect(await mnft.balanceOf(signer1Address, tokenIDnum2)).to.equal(2);
   });
-  
-  describe("7.1 Refund function test", async () => {
-    it("7.1.1 Should be able to refund NFT", async () => {
-      await mnft.safeTransferFrom(
-        signer1Address,
-        signer2Address,
-        tokenIDnum2,
-        1,
-        "0x00"
+  describe("9 Misc Test", async () => {
+    it("9.1 Should Revert if Token address is set to zero", async () => {
+        await expect(mp.connect(owner).setTokenAddress("0x0000000000000000000000000000000000000000")).to.be.reverted;
+        await expect(mp.connect(signer1).setTokenAddress("0x0000000000000000000000000000000000000000")).to.be.revertedWithCustomError(mp,errors.acUnauthorized);
+    });
+    it("9.2 Should Revert if Token quantity is more than balance (Native)", async () => {
+          expect(await mnft[func.hasRole](roles.MARKET_PLACE, mpAddress)).to.equal(
+        true
       );
       const detailsMp = {
-        listingAddress: signer2Address,
-        tokenId: ethers.toBigInt(tokenId2),
-        quantity: 1,
-        price: 100, // cost
+        listingAddress: signer1Address,
+        tokenId: tokenIDnum2,
+        quantity: 10000000,
+        price: ethers.parseEther("10"), // cost
         listedIn: 2,
         start: 1, // start's From
         end: ethers.toBigInt("1000000000000000000000"), // Valid Till
       };
-      const detailsMpPurchase = {
-        buyerAddress: signer3Address,
-        purchaseId: ethers.toBigInt(tokenId2),
+       const detailsMpPurchase = {
+        buyerAddress: ownerAddress,
+        purchaseId: tokenIDnum2,
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
         USDprice: ethers.parseEther("10"), // cost
         txnFees: 0,
-        purchasingIn: 2,
+        purchasingIn: 1,
       };
       const { voucher, purchaseVoucher } = await voucherGeneration(
         mp,
         detailsMp,
         detailsMpPurchase,
-        signer3,
-        signer2,
+        owner,
+        signer1,
         true
       );
 
-      const tx = await mp
+     await expect (mp
         .connect(owner)
-        [func.purchaseUSD](voucher, purchaseVoucher);
-      expect(tx).to.not.be.reverted;
-      expect(await mnft.balanceOf(signer3Address, tokenIDnum2)).to.equal(1);
-
-      const refundVoucher = {};
-      refundVoucher.buyer = signer3Address;
-      refundVoucher.seller = signer2Address;
-      refundVoucher.tokenId = tokenIDnum2;
-      refundVoucher.price = voucher.price;
-      refundVoucher.quantity = 1;
-      await mp.connect(owner)[func.refund](refundVoucher);
-      expect(await mnft.balanceOf(signer2Address, tokenIDnum2)).to.equal(1);
+        .purchaseNative(voucher, purchaseVoucher, {
+          value: ethers.parseEther("21"),
+        })).to.be.revertedWithCustomError(mp,"invalidTokenQuantity");   
+      
     });
-    it("7.1.2 Only the REFUND_MANAGER can refund the tokens", async () => {
-      await mnft.safeTransferFrom(
-        signer1Address,
-        signer2Address,
-        tokenIDnum2,
-        1,
-        "0x00"
+    it("9.3 Should Revert if Token quantity is more than balance (Punk)", async () => {
+          expect(await mnft[func.hasRole](roles.MARKET_PLACE, mpAddress)).to.equal(
+        true
       );
       const detailsMp = {
-        listingAddress: signer2Address,
-        tokenId: ethers.toBigInt(tokenId2),
+        listingAddress: signer1Address,
+        tokenId: tokenIDnum2,
+        quantity: 15000,
+        price: ethers.parseEther("10"), // cost
+        listedIn: 0,
+        start: 1, // start's From
+        end: ethers.toBigInt("1000000000000000000000"), // Valid Till
+      };
+      const detailsMpPurchase = {
+        buyerAddress: ownerAddress,
+        purchaseId: tokenIDnum2,
         quantity: 1,
+        validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
+        USDprice: 0, // cost
+        txnFees: 0,
+        purchasingIn: 0,
+      };
+      const { voucher, purchaseVoucher } = await voucherGeneration(
+        mp,
+        detailsMp,
+        detailsMpPurchase,
+        owner,
+        signer1,
+        true
+      );
+
+      await expect(mp
+        .connect(owner)
+        [func.purchasePunk](voucher, purchaseVoucher)).to.be.revertedWithCustomError(mp,"invalidTokenQuantity");
+    });
+    it("9.4 Should Revert if Token quantity is more than balance (USD)", async () => {
+        const detailsMp = {
+        listingAddress: signer1Address,
+        tokenId: tokenIDnum2,
+        quantity: 111111,
         price: 100, // cost
         listedIn: 2,
         start: 1, // start's From
@@ -221,10 +239,10 @@ describe("7 Refund Test", () => {
       };
       const detailsMpPurchase = {
         buyerAddress: ownerAddress,
-        purchaseId: ethers.toBigInt(tokenId2),
+        purchaseId: tokenIDnum2,
         quantity: 1,
         validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
-        USDprice: ethers.parseEther("100"), // cost
+        USDprice: ethers.parseEther("10"), // cost
         txnFees: 0,
         purchasingIn: 2,
       };
@@ -233,76 +251,25 @@ describe("7 Refund Test", () => {
         detailsMp,
         detailsMpPurchase,
         owner,
-        signer2,
+        signer1,
         true
       );
-
-      const tx = await mp
+      await expect(mp
         .connect(owner)
-        [func.purchaseUSD](voucher, purchaseVoucher);
-      expect(tx).to.not.be.reverted;
-      expect(await mnft.balanceOf(ownerAddress, tokenIDnum2)).to.equal(1);
-
-      const refundVoucher = {};
-      refundVoucher.buyer = ownerAddress;
-      refundVoucher.seller = signer2Address;
-      refundVoucher.tokenId = tokenIDnum2;
-      refundVoucher.price = voucher.price;
-      refundVoucher.quantity = 1;
-      await expect(mp.connect(signer1)[func.refund](refundVoucher))
-        .to.be.revertedWithCustomError(mp, errors.acUnauthorized)
-        .withArgs(anyValue, anyValue);
+        [func.purchaseUSD](voucher, purchaseVoucher)).to.be.revertedWithCustomError(mp,"invalidTokenQuantity");
     });
-    it("7.1.3 Should emit event after a succesfull refund", async () => {
-      await mnft.safeTransferFrom(
-        signer1Address,
-        signer2Address,
-        tokenIDnum2,
-        1,
-        "0x00"
-      );
-      const detailsMp = {
-        listingAddress: signer2Address,
-        tokenId: ethers.toBigInt(tokenId2),
-        quantity: 1,
-        price: 100, // cost
-        listedIn: 2,
-        start: 1, // start's From
-        end: ethers.toBigInt("1000000000000000000000"), // Valid Till
-      };
-      const detailsMpPurchase = {
-        buyerAddress: signer3Address,
-        purchaseId: ethers.toBigInt(tokenId2),
-        quantity: 1,
-        validUntil: ethers.toBigInt("1000000000000000000000"), // Valid Till
-        USDprice: ethers.parseEther("10"), // cost
-        txnFees: 0,
-        purchasingIn: 2,
-      };
-      const { voucher, purchaseVoucher } = await voucherGeneration(
-        mp,
-        detailsMp,
-        detailsMpPurchase,
-        signer3,
-        signer2,
-        true
-      );
-
-      const tx = await mp
-        .connect(owner)
-        [func.purchaseUSD](voucher, purchaseVoucher);
+    it("9.5 Should be able to update PlatformFees", async () => {
+      await mp.connect(owner).updatePlatFormFees(205);
+      expect(await mp.platformFees()).to.equal(205);
+    });
+    it("9.6 Only Manager should be able to update PlatformFees", async () => {
+      await expect(mp.connect(signer1).updatePlatFormFees(205)).to.be.revertedWithCustomError(mp,errors.acUnauthorized);
+    });
+    it("9.7 SetCreationsAddress Test", async () => {
+      const tx = mp.connect(owner).setCreationsAddress(owner.address);
       expect(tx).to.not.be.reverted;
-      expect(await mnft.balanceOf(signer3Address, tokenIDnum2)).to.equal(1);
-
-      const refundVoucher = {};
-      refundVoucher.buyer = signer3Address;
-      refundVoucher.seller = signer2Address;
-      refundVoucher.tokenId = tokenIDnum2;
-      refundVoucher.price = voucher.price;
-      refundVoucher.quantity = 1;
-      expect(await mp.connect(owner)[func.refund](refundVoucher))
-        .to.emit(mp, events.refunded)
-        .withArgs(signer3Address, signer2Address, tokenIDnum2, voucher.price);
+      await expect(mp.connect(owner).setCreationsAddress("0x0000000000000000000000000000000000000000")).to.be.revertedWithCustomError(mp,"setNonZeroCreationsAddress");
+      await expect(mp.connect(signer1).setCreationsAddress(owner.address)).to.be.revertedWithCustomError(mp,errors.acUnauthorized);
     });
   });
 });
